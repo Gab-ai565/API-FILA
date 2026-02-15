@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+<meta charset="UTF-8">
+<title>Fila SUS 🔥</title>
+<style>
+body { font-family: Arial; margin: 30px; }
+input, select, button { padding: 8px; margin: 5px; }
+ul { list-style: none; padding: 0; }
+li { background: #f0f0f0; margin: 4px 0; padding: 8px; border-radius: 4px; }
+</style>
+</head>
+<body>
+<h1>Fila SUS</h1>
+
+<input type="text" id="itemInput" placeholder="Digite o nome do paciente">
+<select id="tipoSelect">
+    <option value="medico">Médico</option>
+    <option value="dentista">Dentista</option>
+    <option value="exame">Exame</option>
+</select>
+<button onclick="enqueue()">Adicionar</button>
+<button onclick="dequeue()">Remover</button>
+
+<h2>Fila atual:</h2>
+<div id="filasContainer"></div>
+
+<script>
+const API = 'http://127.0.0.1:5000';
+const tipos = ['medico','dentista','exame'];
+
+async function fetchFila() {
+    const container = document.getElementById('filasContainer');
+    container.innerHTML = '';
+    for(const tipo of tipos) {
+        const res = await fetch(`${API}/fila?tipo=${tipo}`);
+        const data = await res.json();
+        const div = document.createElement('div');
+        div.innerHTML = `<h3>Fila ${tipo}</h3>`;
+        const ul = document.createElement('ul');
+        data.fila.forEach(item => {
+            const li = document.createElement('li');
+            li.textContent = `${item.id} - ${item.item}`;
+            ul.appendChild(li);
+        });
+        div.appendChild(ul);
+        container.appendChild(div);
+    }
+}
+
+async function enqueue() {
+    const item = document.getElementById('itemInput').value;
+    const tipo = document.getElementById('tipoSelect').value;
+    if(!item) return alert('Digite o nome do paciente!');
+    await fetch(`${API}/enqueue`, {
+        method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({item, tipo})
+    });
+    document.getElementById('itemInput').value = '';
+    fetchFila();
+}
+
+async function dequeue() {
+    const tipo = document.getElementById('tipoSelect').value;
+    await fetch(`${API}/dequeue`, {
+        method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({tipo})
+    });
+    fetchFila();
+}
+
+// Atualiza a cada 2s
+setInterval(fetchFila,2000);
+fetchFila();
+</script>
+</body>
+</html>
