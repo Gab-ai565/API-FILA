@@ -6,7 +6,6 @@ app = Flask(__name__)
 CORS(app)
 DB = 'fila.db'
 
-# Criar tabela com tipo
 def criar_tabela():
     conn = sqlite3.connect(DB)
     c = conn.cursor()
@@ -22,7 +21,6 @@ def criar_tabela():
 
 criar_tabela()
 
-# Helpers
 def adicionar_item(item, tipo):
     conn = sqlite3.connect(DB)
     c = conn.cursor()
@@ -52,7 +50,6 @@ def listar_fila(tipo=None):
     conn.close()
     return [{"id": r[0], "item": r[1], "tipo": r[2]} for r in rows]
 
-# Rotas
 @app.route('/enqueue', methods=['POST'])
 def enqueue():
     data = request.json
